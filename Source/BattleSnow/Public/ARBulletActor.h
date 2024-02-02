@@ -24,10 +24,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UCapsuleComponent* capsuleComp;
+	class USphereComponent* sphereComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* meshComp;
+
+	 //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	 //class UMaterialInterface* matTest;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UProjectileMovementComponent* movementComp;

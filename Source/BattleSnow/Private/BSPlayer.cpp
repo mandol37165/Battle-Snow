@@ -15,6 +15,8 @@ ABSPlayer::ABSPlayer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	RootComponent->SetRelativeScale3D(FVector(4.0f));
+
 	springArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("springArmComp"));
 	springArmComp->SetupAttachment(RootComponent);
 	springArmComp->SetWorldLocation(FVector(0, 70, 90));
@@ -27,7 +29,7 @@ ABSPlayer::ABSPlayer()
 	{
 		GetMesh()->SetSkeletalMesh(tempMesh.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
-		//GetMesh()->SetRelativeScale3D(FVector(4.0f));
+		GetMesh()->SetRelativeScale3D(FVector(1.0f));
 	}
 
 	bUseControllerRotationYaw = true;
@@ -36,7 +38,7 @@ ABSPlayer::ABSPlayer()
 
 	firePos = CreateDefaultSubobject<UArrowComponent>(TEXT("firePos"));
 	firePos->SetupAttachment(GetMesh());
-	firePos->SetRelativeLocationAndRotation(FVector(-20, 10, 140), FRotator(0, 90, 0));
+	firePos->SetRelativeLocationAndRotation(FVector(-17, 60, 140),FRotator(0, 90 ,0));
 }
 
 // Called when the game starts or when spawned
@@ -81,22 +83,50 @@ void ABSPlayer::Move()
 
 void ABSPlayer::OnAxisVertical(float value)
 {
-	direction.X = value * 10;
+	if (false == bOnWidget)
+	{
+		direction.X = value * 5;
+	}
+	else
+	{
+		return;
+	}
 }
 
 void ABSPlayer::OnAxisHorizontal(float value)
 {
-	direction.Y = value * 10;
+	if(false == bOnWidget)
+	{
+		direction.Y = value * 5;
+	}
+	else
+	{
+		return;
+	}
 }
 
 void ABSPlayer::OnAxisTurnYaw(float value)
 {
-	AddControllerYawInput(value);
+	if (false == bOnWidget)
+	{
+		AddControllerYawInput(value);
+	}
+	else
+	{
+		return;
+	}
 }
 
 void ABSPlayer::OnAxisLookupPitch(float value)
 {
-	AddControllerPitchInput(value);
+	if (false == bOnWidget)
+	{
+		AddControllerPitchInput(value);
+	}
+	else
+	{
+		return;
+	}
 }
 
 void ABSPlayer::OnActionJump()
@@ -106,7 +136,7 @@ void ABSPlayer::OnActionJump()
 
 void ABSPlayer::OnActionFire()
 {
-	FTransform t = firePos->GetRelativeTransform();
+	FTransform t = firePos->GetComponentTransform();
 	GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t);
 }
 

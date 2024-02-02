@@ -26,13 +26,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCapsuleComponent* capsuleComp;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpringArmComponent* springArmComp;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* cameraComp;
 
 	FVector direction;
@@ -55,4 +55,9 @@ public:
 
 	void OnActionFire();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsJumping = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bOnWidget;
 };
