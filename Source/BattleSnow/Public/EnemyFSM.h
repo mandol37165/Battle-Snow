@@ -5,14 +5,17 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "EnemyFSM.generated.h"
+//#include "Enemy.h"
 
 UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
-	Idle,
-	Move,
+	GetTarget,
+	Patrol,
 	Attack,
+	Shoot,
 	Damage,
+	Escape,
 	Die,
 };
 
@@ -34,30 +37,58 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly,Category=FSM)
-	EEnemyState state = EEnemyState::Idle;
-	void IdleState();
-	void MoveState();
-	void AttackState();
+	EEnemyState state ;
+
+	void GetTargetState();
+	void PatrolState(FVector DIR);
+	void AttackReadyState();
+	void ShootState();
 	void DamageState();
+	void EscapeState();
 	void DieState();
 		
 	UPROPERTY(EditAnywhere,Category=FSM)
 	float idleDelayTime =2;
 	float currentTime = 0;
 
+	//플레이어 타겟
 	UPROPERTY(EditAnywhere,Category=FSM)
-	AActor* target;
+	AActor* targetP;
 
 	UPROPERTY(EditAnywhere)
 	class AEnemy* me;
 
-	//attackRange 범위 안에 들어오면 공격모드로 전환
+	//슈팅 반경 안에 들어오면 슈팅모드로 전환
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float attackRange=300.0f;
+	float shootingRange=2000;
+	UPROPERTY(EditAnywhere,Category=FSM)
+	float shootingRangeShort=500.0f;
+	UPROPERTY(EditAnywhere,Category=FSM)
+	float shootingRangeMid=1500.0f;
+	UPROPERTY(EditAnywhere,Category=FSM)
+	float shootingRangeLong=2500.0f;
+
+	//attackRange 범위 안에 들어오면 공격준비모드로 전환
+	UPROPERTY(EditAnywhere,Category=FSM)
+	float attackReadyRange=3000.0f;
+
+	UPROPERTY(EditAnywhere,Category=FSM)
+	float escapeRange=3000.0f;
 
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float attackDelayTime=7.0f;
+	float attackDelayTime=2.0f;
 
+	FVector dir;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemy)
+	int32 enemyMaxHP = 100;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemy)
+	int32 enemyCurrentHP = 0;
+
+	UPROPERTY(EditAnywhere)
+	class AEnemy* enemy;
+
+public:
+	int32 weaponInfo;
 };

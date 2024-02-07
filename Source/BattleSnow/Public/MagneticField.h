@@ -27,4 +27,6 @@ public:
 	class UStaticMeshComponent* magneticFieldComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USphereComponent* sphereComp;
+
+	void makeMFSmall();
 };
