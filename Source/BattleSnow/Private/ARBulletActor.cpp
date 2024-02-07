@@ -6,6 +6,7 @@
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/SphereComponent.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Materials/MaterialInterface.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Engine/StaticMesh.h"
+#include "Enemy.h"
 
 
 // Sets default values
@@ -31,19 +32,21 @@ AARBulletActor::AARBulletActor()
 	sphereComp->SetSphereRadius(0.1f);
 	meshComp->SetWorldScale3D(FVector(0.2f));
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tempStaticMesh(TEXT("/Script/Engine.StaticMesh'/Engine/EditorMeshes/EditorSphere.EditorSphere'"));
+	//ConstructorHelpers::FObjectFinder<UStaticMesh> tempStaticMesh(TEXT("/Script/Engine.StaticMesh'/Engine/EditorMeshes/EditorSphere.EditorSphere'"));
 
-	meshComp->SetStaticMesh(tempStaticMesh.Object);
+	//meshComp->SetStaticMesh(tempStaticMesh.Object);
 
-	ConstructorHelpers::FObjectFinder<UMaterialInterface> tempMatTest(TEXT("/Script/Engine.MaterialInstanceConstant'/Game/Mandol/Material/MI_TestBullet.MI_TestBullet'"));
+	//ConstructorHelpers::FObjectFinder<UMaterialInterface> tempMatTest(TEXT("/Script/Engine.MaterialInstanceConstant'/Game/Mandol/Material/MI_TestBullet.MI_TestBullet'"));
 
-	meshComp->GetStaticMesh()->SetMaterial(0, tempMatTest.Object);
+	//meshComp->GetStaticMesh()->SetMaterial(0, tempMatTest.Object);
 }
 
 // Called when the game starts or when spawned
 void AARBulletActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	sphereComp->OnComponentBeginOverlap.AddDynamic(this, &AARBulletActor::OnBulletCompBeginOverlap);
 
 	movementComp->SetUpdatedComponent(sphereComp);
 	
@@ -58,6 +61,15 @@ void AARBulletActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AARBulletActor::OnBulletCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor->IsA<AEnemy>())
+	{
+		// #### 불렛 충돌체 체크 후 데미지 ####
+		// OtherActor->
+	}
 }
 
 void AARBulletActor::AutoDestory()
