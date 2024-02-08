@@ -99,6 +99,8 @@ void UEnemyFSM::PatrolState(FVector DIR)
 {	
 	state = EEnemyState::Patrol;
 	me->AddMovementInput(DIR.GetSafeNormal());
+	FRotator NewRotation = FRotationMatrix::MakeFromX(DIR).Rotator();
+	me->SetActorRotation(NewRotation);
 
 	//플레이어 공격범위 안에 들어오면 공격모드로 전이
 	FVector direction = targetP->GetActorLocation() - me->GetActorLocation();
@@ -119,9 +121,10 @@ void UEnemyFSM::AttackReadyState()
 	else if (weaponInfo == 1) shootingRange = shootingRangeMid;
 	else if (weaponInfo == 2) shootingRange = shootingRangeLong;*/
 
-	float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
 	me->AddMovementInput(dir.GetSafeNormal());
-	
+	FRotator NewRotation = FRotationMatrix::MakeFromX(dir).Rotator();
+	me->SetActorRotation(NewRotation);
+	float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
 	//플레이어 반경에 들면 멈추고 Shoot모드로 전이
 	if (distance <= shootingRange) {
 		state = EEnemyState::ShootReady;

@@ -62,7 +62,7 @@ public:
 
 	//슈팅 반경 안에 들어오면 슈팅모드로 전환
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float shootingRange=2000;
+	float shootingRange=7000;
 	UPROPERTY(EditAnywhere,Category=FSM)
 	float shootingRangeShort=500.0f;
 	UPROPERTY(EditAnywhere,Category=FSM)
@@ -72,10 +72,10 @@ public:
 
 	//attackRange 범위 안에 들어오면 공격준비모드로 전환
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float attackReadyRange=3000.0f;
+	float attackReadyRange=12000.0f;
 
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float escapeRange=6000.0f;
+	float escapeRange=8000.0f;
 
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere,Category=FSM)
