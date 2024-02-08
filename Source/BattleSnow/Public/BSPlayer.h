@@ -34,6 +34,12 @@ public:
 	//	bool bFromSweep ,
 	//	const FHitResult& SweepResult );
 
+	UFUNCTION()
+	void PlayerEndOverlap(UPrimitiveComponent* OverlappedComp, 
+							AActor* otherActor,
+							UPrimitiveComponent* otherComp, 
+							int32 otherBodyIndex);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCapsuleComponent* capsuleComp;
 
@@ -97,12 +103,12 @@ public:
 	bool bOnWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float playerMaxHP = 10;
+	float playerMaxHP = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float playerCurrentHP = playerMaxHP;
+	float playerCurrentHP;
 
-	void PlayerTakeDamage();
+	void PlayerTakeDamage(int damage);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsEquipRifle = false;
@@ -123,13 +129,49 @@ public:
 	bool bIsAiming = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasAmmo;
+	bool bHasARAmmo = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float maxAmmoAmount;
+	bool bHasSRAmmo = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float currentAmmoAmount;
+	bool bHasSGAmmo = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHasFirstSlot = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHaSecondSlot = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool inMfield;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 maxARAmmoAmount = 30;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32  currentARAmmoAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 capacityARAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32  maxSRAmmoAmount = 4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32  currentSRAmmoAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 capacitySRAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32  maxSGAmmoAmount = 8;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32  currentSGAmmoAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 capacitySGAmount;
 
 	void OnActionAiming();
 
@@ -141,4 +183,31 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float targetFOV = 90;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int checkFirstWeaponIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int checkSecondWeaponIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int checkCurrentWeaponIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool selectFirstSlot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool selectSecondSlot;
+
+	void PlayerisDead();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isPlayerDead = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* playerDeadMontage;
+
+	void CheckMFIn();
+
+	void TakeDamageOutMF();
 };

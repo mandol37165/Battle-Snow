@@ -18,10 +18,6 @@ AMagneticField::AMagneticField()
 	magneticFieldComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("magneticFieldComp"));
 	magneticFieldComp->SetupAttachment(RootComponent);
 
-	sphereComp->SetGenerateOverlapEvents(true);
-	sphereComp->SetCollisionProfileName("MageneticField");
-
-	magneticFieldComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ConstructorHelpers::FObjectFinder<UStaticMesh> tempMesh(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	if (tempMesh.Succeeded()) {
 		magneticFieldComp->SetStaticMesh(tempMesh.Object);
@@ -35,6 +31,11 @@ AMagneticField::AMagneticField()
 		}
 	}
 
+	magneticFieldComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	sphereComp->SetGenerateOverlapEvents(true);
+	sphereComp->SetCollisionProfileName("MageneticField");
+
 }
 
 // Called when the game starts or when spawned
@@ -44,7 +45,7 @@ void AMagneticField::BeginPlay()
 
 	FTimerHandle TimerHandle;
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMagneticField::makeMFSmall,5.0f, true);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMagneticField::makeMFSmall, 5.0f, true);
 
 
 }

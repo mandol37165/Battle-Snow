@@ -40,7 +40,8 @@ void AMFManager::BeginPlay()
                     // MFPoint 액터의 위치값을 가져오기.
                     MFLocation = SelectedActor->GetActorLocation();
                     // 자기장 생성
-                   World->SpawnActor<AMagneticField>(AMagneticField::StaticClass(), MFLocation, FRotator::ZeroRotator);
+                   //World->SpawnActor<AMagneticField>(AMagneticField::StaticClass(), MFLocation, FRotator::ZeroRotator);
+                   World->SpawnActor<AMagneticField>(magneticFieldFactory, MFLocation, FRotator::ZeroRotator);
                     UE_LOG(LogTemp, Warning, TEXT("complete") );
                 
             }
