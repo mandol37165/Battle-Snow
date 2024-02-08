@@ -451,11 +451,6 @@ void ABSPlayer::OnActionFire()
 	}
 }
 
-void ABSPlayer::PlayerTakeDamage(int damage)
-{
-	
-}
-
 void ABSPlayer::PlayerisDead()
 {
 	if (playerCurrentHP <= 0)
@@ -530,5 +525,15 @@ void ABSPlayer::OnActionZoomOut()
 void ABSPlayer::Zoom()
 {
 	cameraComp->FieldOfView = FMath::Lerp<float>(cameraComp->FieldOfView, targetFOV, GetWorld()->GetDeltaSeconds() * 6);
+}
+
+void ABSPlayer::onDamage()
+{
+	playerCurrentHP -= 10;
+
+	if (playerCurrentHP <= 0)
+	{
+		PlayAnimMontage(playerDeadMontage)
+	}
 }
 

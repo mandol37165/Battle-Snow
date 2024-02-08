@@ -108,7 +108,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float playerCurrentHP;
 
-	void PlayerTakeDamage(int damage);
+	void onDamage();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsEquipRifle = false;
