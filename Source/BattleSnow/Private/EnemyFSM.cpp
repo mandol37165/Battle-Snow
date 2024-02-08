@@ -143,6 +143,7 @@ void UEnemyFSM::ShootState()
 	currentTime += GetWorld()->GetDeltaSeconds();
 	if (currentTime > 0.7) {
 		startShooting();
+		UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
 		currentTime = 0;
 	}
 
@@ -164,6 +165,7 @@ void UEnemyFSM::ShootState()
 
 void UEnemyFSM::DamageState()
 {
+	
 	enemyCurrentHP -= 10;
 
 	if (enemyCurrentHP <= 0) {

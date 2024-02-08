@@ -103,7 +103,7 @@ void AEnemy::OnFire() const
 {
 	FTransform t = firePos->GetComponentTransform();
 	GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t);
-	
+
 }
 
 

@@ -94,6 +94,8 @@ public:
 public:
 	int32 weaponInfo;
 
+
+
 	UPROPERTY(EditAnywhere)
 	class USoundBase* fireSFX;
 
