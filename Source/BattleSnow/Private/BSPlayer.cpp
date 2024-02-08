@@ -313,7 +313,7 @@ void ABSPlayer::OnActionFire()
 
 					if (bReturnValue)
 					{
-						DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+						//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
 
 						//UPrimitiveComponent* hitComp = outHit.GetComponent();
 
@@ -367,7 +367,7 @@ void ABSPlayer::OnActionFire()
 
 					if (bReturnValue)
 					{
-						DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+						//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
 
 						//UPrimitiveComponent* hitComp = outHit.GetComponent();
 
@@ -421,7 +421,7 @@ void ABSPlayer::OnActionFire()
 
 					if (bReturnValue)
 					{
-						DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+						//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
 
 						//UPrimitiveComponent* hitComp = outHit.GetComponent();
 
@@ -533,7 +533,7 @@ void ABSPlayer::onDamage()
 
 	if (playerCurrentHP <= 0)
 	{
-		PlayAnimMontage(playerDeadMontage)
+		PlayerisDead();
 	}
 }
 
