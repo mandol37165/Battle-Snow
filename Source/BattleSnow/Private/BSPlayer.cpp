@@ -172,6 +172,8 @@ ABSPlayer::ABSPlayer()
 	Super::BeginPlay();
 
 	playerCurrentHP = playerMaxHP;
+
+	inMfield = true;
 }
 
 // Called every frame
