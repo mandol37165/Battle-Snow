@@ -12,8 +12,8 @@ enum class EEnemyState : uint8
 {
 	GetTarget,
 	Patrol,
-	Attack,
-	Shoot,
+	AttackReady,
+	ShootReady,
 	Damage,
 	Escape,
 	Die,
@@ -36,7 +36,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly,Category=FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category=FSM)
 	EEnemyState state ;
 
 	void GetTargetState();
@@ -46,6 +46,8 @@ public:
 	void DamageState();
 	void EscapeState();
 	void DieState();
+
+	void startShooting();
 		
 	UPROPERTY(EditAnywhere,Category=FSM)
 	float idleDelayTime =2;
@@ -73,7 +75,7 @@ public:
 	float attackReadyRange=3000.0f;
 
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float escapeRange=3000.0f;
+	float escapeRange=6000.0f;
 
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere,Category=FSM)
@@ -91,4 +93,8 @@ public:
 
 public:
 	int32 weaponInfo;
+
+	UPROPERTY(EditAnywhere)
+	class USoundBase* fireSFX;
+
 };

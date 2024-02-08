@@ -30,7 +30,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSMComponent)
 	class UEnemyFSM* fsm;
 
-	
+public:
+	int32 weaponNum;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* weaponMeshComp0;
@@ -39,6 +40,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* weaponMeshComp2;
 
+	UPROPERTY(EditAnywhere)
+	class UArrowComponent* firePos;
+
 public:
-	int32 weaponNum;
+	void OnFire() const;
+
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AARBulletActor> bulletFactory;
+
+	
 };

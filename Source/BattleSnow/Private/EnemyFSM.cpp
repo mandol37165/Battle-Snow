@@ -7,6 +7,8 @@
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "MFManager.h"
 #include "EngineUtils.h"
+#include "ARBulletActor.h"
+#include "TimerManager.h"
 
 // Sets default values for this component's properties
 UEnemyFSM::UEnemyFSM()
@@ -52,10 +54,10 @@ void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	case EEnemyState::Patrol:
 		PatrolState(dir);
 		break;
-	case EEnemyState::Attack:
+	case EEnemyState::AttackReady:
 		AttackReadyState();
 		break;
-	case EEnemyState::Shoot:
+	case EEnemyState::ShootReady:
 		ShootState();
 		break;
 	case EEnemyState::Damage:
@@ -101,7 +103,7 @@ void UEnemyFSM::PatrolState(FVector DIR)
 	//플레이어 공격범위 안에 들어오면 공격모드로 전이
 	FVector direction = targetP->GetActorLocation() - me->GetActorLocation();
 	if (direction.Size() < attackReadyRange) {
-		state = EEnemyState::Attack;
+		state = EEnemyState::AttackReady;
 	}
 
 }
@@ -122,7 +124,7 @@ void UEnemyFSM::AttackReadyState()
 	
 	//플레이어 반경에 들면 멈추고 Shoot모드로 전이
 	if (distance <= shootingRange) {
-		state = EEnemyState::Shoot;
+		state = EEnemyState::ShootReady;
 	}
 	
 
@@ -133,14 +135,29 @@ void UEnemyFSM::AttackReadyState()
 
 void UEnemyFSM::ShootState()
 {
+	FVector directionToPlayer = targetP->GetActorLocation() - me->GetActorLocation();
+	FRotator NewRotation= FRotationMatrix::MakeFromX(directionToPlayer).Rotator();
+	me->SetActorRotation(NewRotation);
+
+	//0.7초마다 발사
+	currentTime += GetWorld()->GetDeltaSeconds();
+	if (currentTime > 0.7) {
+		startShooting();
+		currentTime = 0;
+	}
+
 	float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
+
 	//공격 범위 벗어나면 patrol모드로 전이
 	if (distance > attackReadyRange) {
+		//GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 		state = EEnemyState::GetTarget;
+
 	}
 
 	//체력이 30이하면 escape 모드로 전이
 	else if (enemyCurrentHP <= 30) {
+		//GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 		state = EEnemyState::Escape;
 	}
 }
@@ -160,7 +177,8 @@ void UEnemyFSM::EscapeState()
 	//플레이어와 반대 방향으로 이동
 	dir =  me->GetActorLocation()- targetP->GetActorLocation();
 	me->AddMovementInput(dir.GetSafeNormal());
-
+	FRotator NewRotation = FRotationMatrix::MakeFromX(dir).Rotator();
+	me->SetActorRotation(NewRotation);
 
 	// 일정 거리 이상 멀어졌을 시 patrol 모드로 전이
 	float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
@@ -171,7 +189,38 @@ void UEnemyFSM::EscapeState()
 
 void UEnemyFSM::DieState()
 {
-	// die 애니메이션 재생
+	
 }
 
+void UEnemyFSM::startShooting()
+{
+	FHitResult outHit;
+
+	FVector Start = me->GetActorLocation(); // 레이캐스트의 시작점
+	FVector End = Start + me->GetActorForwardVector() * 100000; // 레이캐스트의 종료점
+
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(me); // 현재 액터는 충돌 검사에서 무시
+
+	// 레이캐스트를 수행하고 충돌 정보를 outHit에 저장.
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(outHit, Start, End, ECC_Visibility, CollisionParams);
+
+	if (bIsHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("bls Hit True"));
+		// 충돌한 액터를 처리
+		AActor* HitActor = outHit.GetActor();
+		if (HitActor)
+		{
+			// 충돌한 액터가 적인지 확인
+			ABSPlayer* playerActor = Cast<ABSPlayer>(HitActor);
+			if (playerActor)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("hit actor is player"));
+				//플레이어 damage 처리
+				playerActor->onDamage();
+			}
+		}
+	}
+}
 
