@@ -12,6 +12,8 @@
 #include "../../../../../../../Source/Runtime/Engine/Classes/Engine/StaticMesh.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h"
 #include "../../../../../../../Source/Runtime/Core/Public/UObject/NameTypes.h"
+#include "EnemyFSM.h"
+#include "Engine/EngineTypes.h"
 
 // Sets default values
 ABSPlayer::ABSPlayer()
@@ -167,6 +169,8 @@ ABSPlayer::ABSPlayer()
 	void ABSPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	playerCurrentHP = playerMaxHP;
 }
 
 // Called every frame
@@ -177,6 +181,8 @@ void ABSPlayer::Tick(float DeltaTime)
 	Move();
 
 	Zoom();
+
+	PlayerisDead();
 }
 
 // Called to bind functionality to input
@@ -201,6 +207,11 @@ void ABSPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("AimingAndZoom"), IE_Pressed, this, &ABSPlayer::OnActionZoomIn);
 
 	PlayerInputComponent->BindAction(TEXT("AimingAndZoom"), IE_Released, this, &ABSPlayer::OnActionZoomOut);
+
+}
+
+void ABSPlayer::PlayerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* otherActor, UPrimitiveComponent* otherComp, int32 otherBodyIndex)
+{
 
 }
 
@@ -271,71 +282,239 @@ void ABSPlayer::OnActionJump()
 
 void ABSPlayer::OnActionFire()
 {
-	if (bIsEquipRifle && bIsAiming)
+	if (bIsEquipRifle && bIsEquipRifleOnHand)
 	{
-		bIsFire = true;
+		bIsAiming = true;
 
-		// #### Bullet Spawn ####
-		FTransform t = firePos->GetComponentTransform();
-		FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
+		if (checkCurrentWeaponIndex == 0) 
+		{
+			if (bHasARAmmo && currentARAmmoAmount > 0)
+			{
+				bIsFire = true;
 
-		GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
+				currentARAmmoAmount--;
+
+				// #### Bullet Spawn ####
+				//FTransform t = firePos->GetComponentTransform();
+				//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
+
+				//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
 
 
-		//if (false == bOnWidget)
-		//{
-		//	FHitResult outHit;
-		//	FVector start = cameraComp->GetComponentLocation();
-		//	FVector end = start + cameraComp->GetForwardVector() * 100000;
-		//	FCollisionQueryParams params;
-		//	params.AddIgnoredActor(this);
+				if (false == bOnWidget)
+				{
+					FHitResult outHit;
+					FVector start = cameraComp->GetComponentLocation();
+					FVector end = start + cameraComp->GetForwardVector() * 100000;
+					FCollisionQueryParams params;
+					params.AddIgnoredActor(this);
 
-		//	bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
+					bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
 
-		//	if (bReturnValue)
-		//	{
-		//		// DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+					if (bReturnValue)
+					{
+						DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
 
-		//		UPrimitiveComponent* hitComp = outHit.GetComponent();
+						//UPrimitiveComponent* hitComp = outHit.GetComponent();
 
-		//		AEnemy* enemy = Cast<AEnemy>(outHit.GetActor());
-		//		if (enemy)
-		//		{
-		//			//auto fsm = Cast<UEnemyFSMComp>(enemy->GetActorClassDefaultComponentByName(TEXT("enemyFSM"));
+						AActor* HitActor = outHit.GetActor();
 
-		//			// #### Enemy 单固瘤 贸府 ####
-		//			// enemy->OnMyTakeDamage(1);
-		//		}
-		//	}
-		//}
+						AEnemy* enemyActor = Cast<AEnemy>(HitActor);
+						if (enemyActor)
+						{
+							auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
+
+							if (enemy)
+							{
+								auto enemyFSM = Cast<UEnemyFSM>(enemy);
+
+								// #### Enemy 单固瘤 贸府 ####
+								enemyFSM->DamageState();
+							}
+						}
+					}
+				}
+				if (currentARAmmoAmount <= 0)
+				{
+					bHasARAmmo = false;
+				}
+			}
+		}
+		else if (checkCurrentWeaponIndex == 1)
+		{
+			if (bHasSGAmmo && currentSGAmmoAmount > 0)
+			{
+				bIsFire = true;
+
+				currentSGAmmoAmount--;
+
+				// #### Bullet Spawn ####
+				//FTransform t = firePos->GetComponentTransform();
+				//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
+
+				//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
+
+
+				if (false == bOnWidget)
+				{
+					FHitResult outHit;
+					FVector start = cameraComp->GetComponentLocation();
+					FVector end = start + cameraComp->GetForwardVector() * 100000;
+					FCollisionQueryParams params;
+					params.AddIgnoredActor(this);
+
+					bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
+
+					if (bReturnValue)
+					{
+						DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+
+						//UPrimitiveComponent* hitComp = outHit.GetComponent();
+
+						AActor* HitActor = outHit.GetActor();
+
+						AEnemy* enemyActor = Cast<AEnemy>(HitActor);
+						if (enemyActor)
+						{
+							auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
+
+							if (enemy)
+							{
+								auto enemyFSM = Cast<UEnemyFSM>(enemy);
+
+								// #### Enemy 单固瘤 贸府 ####
+								enemyFSM->DamageState();
+							}
+						}
+					}
+				}
+				if (currentSGAmmoAmount <= 0)
+				{
+					bHasSGAmmo = false;
+				}
+			}
+		}
+		else if (checkCurrentWeaponIndex == 2)
+		{
+			if (bHasSRAmmo && currentSRAmmoAmount > 0)
+			{
+				bIsFire = true;
+
+				currentSRAmmoAmount--;
+
+				// #### Bullet Spawn ####
+				//FTransform t = firePos->GetComponentTransform();
+				//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
+
+				//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
+
+
+				if (false == bOnWidget)
+				{
+					FHitResult outHit;
+					FVector start = cameraComp->GetComponentLocation();
+					FVector end = start + cameraComp->GetForwardVector() * 100000;
+					FCollisionQueryParams params;
+					params.AddIgnoredActor(this);
+
+					bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
+
+					if (bReturnValue)
+					{
+						DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+
+						//UPrimitiveComponent* hitComp = outHit.GetComponent();
+
+						AActor* HitActor = outHit.GetActor();
+
+						AEnemy* enemyActor = Cast<AEnemy>(HitActor);
+						if (enemyActor)
+						{
+							auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
+
+							if (enemy)
+							{
+								auto enemyFSM = Cast<UEnemyFSM>(enemy);
+
+								// #### Enemy 单固瘤 贸府 ####
+								enemyFSM->DamageState();
+							}
+						}
+					}
+				}
+				if (currentSRAmmoAmount <= 0)
+				{
+					bHasSRAmmo = false;
+				}
+			}
+		}
 	}
 }
 
-void ABSPlayer::PlayerTakeDamage()
+void ABSPlayer::PlayerTakeDamage(int damage)
 {
 	
 }
 
+void ABSPlayer::PlayerisDead()
+{
+	if (playerCurrentHP <= 0)
+	{
+		isPlayerDead = true;
+		this->PlayAnimMontage(playerDeadMontage);
+	}
+}
+
+void ABSPlayer::CheckMFIn()
+{
+
+}
+
+void ABSPlayer::TakeDamageOutMF()
+{
+	if (false == inMfield) 
+	{
+		double Seconds = FPlatformTime::Seconds();
+		int64 curMilSec = static_cast<int64>(Seconds * 1000);
+
+		static int64 milliseconds = 0;
+
+		if (curMilSec - milliseconds > 500)
+		{
+			playerCurrentHP -= 0.5;
+		}
+		
+	}
+}
+
 void ABSPlayer::OnActionAiming()
 {
-	if (bIsEquipRifle)
+	if (bIsEquipRifle && bIsEquipRifleOnHand)
 	{
-		if (false == bIsAiming)
-		{
-			bIsAiming = true;
-		}
-		else
-		{
-			bIsAiming = false;
-		}
+		//if (false == bIsAiming)
+		//{
+		//	bIsAiming = true;
+		//}
+		//else
+		//{
+		//	bIsAiming = false;
+		//}
 	}
 }
 
 void ABSPlayer::OnActionZoomIn()
 {
-	if (bIsAiming)
+	if (bIsAiming && checkCurrentWeaponIndex == 0)
 	{
 		targetFOV = 50;
+	}
+	else if (bIsAiming && checkCurrentWeaponIndex == 1)
+	{
+		targetFOV = 50;
+	}
+	else if (bIsAiming && checkCurrentWeaponIndex == 2)
+	{
+		targetFOV = 20;
 	}
 	else
 	{

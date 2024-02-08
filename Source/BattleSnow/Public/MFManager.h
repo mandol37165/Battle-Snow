@@ -24,5 +24,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 public:
 	FVector MFLocation;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AMagneticField> magneticFieldFactory;
 	
 };

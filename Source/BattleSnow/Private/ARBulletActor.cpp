@@ -68,7 +68,8 @@ void AARBulletActor::OnBulletCompBeginOverlap(UPrimitiveComponent* OverlappedCom
 	if (OtherActor->IsA<AEnemy>())
 	{
 		// #### 불렛 충돌체 체크 후 데미지 ####
-		// OtherActor->
+		UE_LOG(LogTemp, Warning, TEXT("Enemy->Player Attack!!!!!"));
+		GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Black, TEXT("Enemy->Player Attack!!"));
 	}
 }
 
