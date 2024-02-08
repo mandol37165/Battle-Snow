@@ -14,6 +14,7 @@
 #include "../../../../../../../Source/Runtime/Core/Public/UObject/NameTypes.h"
 #include "EnemyFSM.h"
 #include "Engine/EngineTypes.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 // Sets default values
 ABSPlayer::ABSPlayer()
@@ -292,6 +293,8 @@ void ABSPlayer::OnActionFire()
 			{
 				bIsFire = true;
 
+				UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
+
 				currentARAmmoAmount--;
 
 				// #### Bullet Spawn ####
@@ -316,6 +319,8 @@ void ABSPlayer::OnActionFire()
 						//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
 
 						//UPrimitiveComponent* hitComp = outHit.GetComponent();
+
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
 
 						AActor* HitActor = outHit.GetActor();
 
@@ -346,6 +351,8 @@ void ABSPlayer::OnActionFire()
 			{
 				bIsFire = true;
 
+				UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
+
 				currentSGAmmoAmount--;
 
 				// #### Bullet Spawn ####
@@ -371,6 +378,8 @@ void ABSPlayer::OnActionFire()
 
 						//UPrimitiveComponent* hitComp = outHit.GetComponent();
 
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
+
 						AActor* HitActor = outHit.GetActor();
 
 						AEnemy* enemyActor = Cast<AEnemy>(HitActor);
@@ -381,6 +390,8 @@ void ABSPlayer::OnActionFire()
 							if (enemy)
 							{
 								auto enemyFSM = Cast<UEnemyFSM>(enemy);
+
+								UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
 
 								// #### Enemy 单固瘤 贸府 ####
 								enemyFSM->DamageState();
@@ -399,6 +410,8 @@ void ABSPlayer::OnActionFire()
 			if (bHasSRAmmo && currentSRAmmoAmount > 0)
 			{
 				bIsFire = true;
+
+				UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
 
 				currentSRAmmoAmount--;
 
@@ -425,6 +438,8 @@ void ABSPlayer::OnActionFire()
 
 						//UPrimitiveComponent* hitComp = outHit.GetComponent();
 
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
+
 						AActor* HitActor = outHit.GetActor();
 
 						AEnemy* enemyActor = Cast<AEnemy>(HitActor);
@@ -435,6 +450,8 @@ void ABSPlayer::OnActionFire()
 							if (enemy)
 							{
 								auto enemyFSM = Cast<UEnemyFSM>(enemy);
+
+								
 
 								// #### Enemy 单固瘤 贸府 ####
 								enemyFSM->DamageState();

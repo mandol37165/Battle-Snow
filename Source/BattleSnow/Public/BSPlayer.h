@@ -207,7 +207,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* playerDeadMontage;
 
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* expVFX;
+
 	void CheckMFIn();
 
 	void TakeDamageOutMF();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* fireSFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool hasDrug;
 };
