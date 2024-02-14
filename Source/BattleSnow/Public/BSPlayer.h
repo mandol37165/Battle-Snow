@@ -103,7 +103,7 @@ public:
 	bool bOnWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float playerMaxHP = 100;
+	float playerMaxHP = 200;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float playerCurrentHP;
@@ -118,6 +118,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsCrouch;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsEquipCrouch;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsProne = false;

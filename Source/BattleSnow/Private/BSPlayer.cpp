@@ -226,7 +226,7 @@ void ABSPlayer::PlayerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* ot
 void ABSPlayer::Move()
 {
 	FTransform trans = GetActorTransform();
-	AddMovementInput(trans.TransformVector(direction));
+	AddMovementInput(trans.TransformVector(direction.GetSafeNormal2D()));
 }
 
 void ABSPlayer::OnAxisVertical(float value)
