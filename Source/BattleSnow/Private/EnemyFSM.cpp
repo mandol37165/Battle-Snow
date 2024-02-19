@@ -38,7 +38,7 @@ void UEnemyFSM::BeginPlay()
        weaponInfo = me->weaponNum;
        UE_LOG(LogTemp, Warning, TEXT("%s"),weaponInfo );
     }*/
-    GetRandomChasePoint(SearchRadius, chasePoint);
+    //GetRandomChasePoint(SearchRadius, chasePoint);
     //초기 모드 getTarget
 
     state = EEnemyState::Ready;
@@ -90,7 +90,7 @@ void UEnemyFSM::ReadyState()
 {
     me->SetActorHiddenInGame(true);
     currentTime += GetWorld()->GetDeltaSeconds();
-    if (currentTime > 10) {
+    if (currentTime > 30) {
         me->SetActorHiddenInGame(false);
         state = EEnemyState::GetTarget;
     }
