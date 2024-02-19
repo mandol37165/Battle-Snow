@@ -13,5 +13,8 @@ UCLASS()
 class BATTLESNOW_API ABSGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+	public:
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 countOfSurvivors = 5;
 };
