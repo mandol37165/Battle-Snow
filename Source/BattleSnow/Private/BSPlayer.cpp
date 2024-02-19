@@ -516,6 +516,7 @@ void ABSPlayer::OnActionFire()
 			}
 		}
 	}
+	bIsFire = false;
 }
 
 void ABSPlayer::PlayerisDead()

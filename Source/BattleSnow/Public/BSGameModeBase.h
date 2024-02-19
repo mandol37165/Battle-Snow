@@ -17,4 +17,7 @@ class BATTLESNOW_API ABSGameModeBase : public AGameModeBase
 	public:
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 countOfSurvivors = 5;
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 killCount = 0;
 };
