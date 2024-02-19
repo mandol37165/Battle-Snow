@@ -15,6 +15,7 @@
 #include "EnemyFSM.h"
 #include "Engine/EngineTypes.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "../../../../../../../Source/Runtime/UMG/Public/Blueprint/UserWidget.h"
 
 // Sets default values
 ABSPlayer::ABSPlayer()
@@ -160,6 +161,32 @@ ABSPlayer::ABSPlayer()
 		barretLSPos->SetVisibility(false);
 	}
 
+	parachutePos = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ParachutePos"));
+	parachutePos->SetupAttachment(GetMesh());
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempParachete(TEXT("/Script/Engine.StaticMesh'/Game/Models/Parachute/Parachute.Parachute'"));
+
+	if (tempParachete.Succeeded())
+	{
+		parachutePos->SetStaticMesh(tempParachete.Object);
+		parachutePos->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("LeftHandSocket"));
+		parachutePos->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		parachutePos->SetVisibility(false);
+	}
+
+	rChickenPos = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RchickenPos"));
+	rChickenPos->SetupAttachment(GetMesh());
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> temprChicken(TEXT("/Script/Engine.StaticMesh'/Game/Megascans/3D_Assets/Grilled_Turkey_Leg_wd5lcfcaa/S_Grilled_Turkey_Leg_wd5lcfcaa_lod3_Var1.S_Grilled_Turkey_Leg_wd5lcfcaa_lod3_Var1'"));
+
+	if (temprChicken.Succeeded())
+	{
+		rChickenPos->SetStaticMesh(temprChicken.Object);
+		rChickenPos->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("RightChicken"));
+		rChickenPos->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		rChickenPos->SetVisibility(false);
+	}
+
 	firePos = CreateDefaultSubobject<UArrowComponent>(TEXT("firePos"));
 	firePos->SetupAttachment(ak47AttachPos);
 	//firePos->SetRelativeLocationAndRotation(FVector(-17, 60, 140),FRotator(0, 90 ,0));
@@ -174,6 +201,10 @@ ABSPlayer::ABSPlayer()
 	playerCurrentHP = playerMaxHP;
 
 	inMfield = true;
+
+	sniperUI = CreateWidget(GetWorld(), sniperFactory);
+	sniperUI->AddToViewport();
+	sniperUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
 // Called every frame
@@ -211,6 +242,7 @@ void ABSPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction(TEXT("AimingAndZoom"), IE_Released, this, &ABSPlayer::OnActionZoomOut);
 
+	PlayerInputComponent->BindAction(TEXT("ActionCrouch"), IE_Pressed, this, &ABSPlayer::OnActionCrouch);
 }
 
 void ABSPlayer::PlayerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* otherActor, UPrimitiveComponent* otherComp, int32 otherBodyIndex)
@@ -226,7 +258,7 @@ void ABSPlayer::PlayerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* ot
 void ABSPlayer::Move()
 {
 	FTransform trans = GetActorTransform();
-	AddMovementInput(trans.TransformVector(direction));
+	AddMovementInput(trans.TransformVector(direction.GetSafeNormal2D()));
 }
 
 void ABSPlayer::OnAxisVertical(float value)
@@ -285,185 +317,201 @@ void ABSPlayer::OnActionJump()
 
 void ABSPlayer::OnActionFire()
 {
-	if (bIsEquipRifle && bIsEquipRifleOnHand)
+	if (false == bOnWidget)
 	{
-		bIsAiming = true;
-
-		if (checkCurrentWeaponIndex == 0) 
+		if (bIsEquipRifle && bIsEquipRifleOnHand)
 		{
-			if (bHasARAmmo && currentARAmmoAmount > 0)
+			bIsAiming = true;
+
+			if (checkCurrentWeaponIndex == 0)
 			{
-				bIsFire = true;
-
-				UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
-
-				currentARAmmoAmount--;
-
-				// #### Bullet Spawn ####
-				//FTransform t = firePos->GetComponentTransform();
-				//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
-
-				//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
-
-
-				if (false == bOnWidget)
+				if (bHasARAmmo && capacityARAmount > 0)
 				{
-					FHitResult outHit;
-					FVector start = cameraComp->GetComponentLocation();
-					FVector end = start + cameraComp->GetForwardVector() * 100000;
-					FCollisionQueryParams params;
-					params.AddIgnoredActor(this);
+					bIsFire = true;
 
-					bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
+					UGameplayStatics::PlaySound2D(GetWorld(), ak47SFX);
 
-					if (bReturnValue)
+					capacityARAmount--;
+
+					// #### Bullet Spawn ####
+					//FTransform t = firePos->GetComponentTransform();
+					//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
+
+					//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
+
+
+					if (false == bOnWidget)
 					{
-						//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+						FHitResult outHit;
+						FVector start = cameraComp->GetComponentLocation();
+						FVector end = start + cameraComp->GetForwardVector() * 100000;
+						FCollisionQueryParams params;
+						params.AddIgnoredActor(this);
 
-						//UPrimitiveComponent* hitComp = outHit.GetComponent();
+						bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
 
-						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
-
-						AActor* HitActor = outHit.GetActor();
-
-						AEnemy* enemyActor = Cast<AEnemy>(HitActor);
-						if (enemyActor)
+						if (bReturnValue)
 						{
-							auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
+							//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
 
-							if (enemy)
+							//UPrimitiveComponent* hitComp = outHit.GetComponent();
+
+							//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
+
+							AActor* HitActor = outHit.GetActor();
+
+							AEnemy* enemyActor = Cast<AEnemy>(HitActor);
+							if (enemyActor)
 							{
-								auto enemyFSM = Cast<UEnemyFSM>(enemy);
+								auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
 
-								// #### Enemy 单固瘤 贸府 ####
-								enemyFSM->DamageState();
+								if (enemy)
+								{
+									auto enemyFSM = Cast<UEnemyFSM>(enemy);
+
+									// #### Enemy 单固瘤 贸府 ####
+									enemyFSM->DamageState();
+									UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), bloodFX, outHit.ImpactPoint);
+								}
 							}
-						}
-					}
-				}
-				if (currentARAmmoAmount <= 0)
-				{
-					bHasARAmmo = false;
-				}
-			}
-		}
-		else if (checkCurrentWeaponIndex == 1)
-		{
-			if (bHasSGAmmo && currentSGAmmoAmount > 0)
-			{
-				bIsFire = true;
-
-				UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
-
-				currentSGAmmoAmount--;
-
-				// #### Bullet Spawn ####
-				//FTransform t = firePos->GetComponentTransform();
-				//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
-
-				//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
-
-
-				if (false == bOnWidget)
-				{
-					FHitResult outHit;
-					FVector start = cameraComp->GetComponentLocation();
-					FVector end = start + cameraComp->GetForwardVector() * 100000;
-					FCollisionQueryParams params;
-					params.AddIgnoredActor(this);
-
-					bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
-
-					if (bReturnValue)
-					{
-						//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
-
-						//UPrimitiveComponent* hitComp = outHit.GetComponent();
-
-						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
-
-						AActor* HitActor = outHit.GetActor();
-
-						AEnemy* enemyActor = Cast<AEnemy>(HitActor);
-						if (enemyActor)
-						{
-							auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
-
-							if (enemy)
+							else 
 							{
-								auto enemyFSM = Cast<UEnemyFSM>(enemy);
-
 								UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
-
-								// #### Enemy 单固瘤 贸府 ####
-								enemyFSM->DamageState();
 							}
 						}
 					}
-				}
-				if (currentSGAmmoAmount <= 0)
-				{
-					bHasSGAmmo = false;
+					if (currentARAmmoAmount <= 0 && capacityARAmount <= 0)
+					{
+						bHasARAmmo = false;
+					}
 				}
 			}
-		}
-		else if (checkCurrentWeaponIndex == 2)
-		{
-			if (bHasSRAmmo && currentSRAmmoAmount > 0)
+			else if (checkCurrentWeaponIndex == 1)
 			{
-				bIsFire = true;
-
-				UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
-
-				currentSRAmmoAmount--;
-
-				// #### Bullet Spawn ####
-				//FTransform t = firePos->GetComponentTransform();
-				//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
-
-				//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
-
-
-				if (false == bOnWidget)
+				if (bHasSGAmmo && capacitySGAmount > 0)
 				{
-					FHitResult outHit;
-					FVector start = cameraComp->GetComponentLocation();
-					FVector end = start + cameraComp->GetForwardVector() * 100000;
-					FCollisionQueryParams params;
-					params.AddIgnoredActor(this);
+					bIsFire = true;
 
-					bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
+					UGameplayStatics::PlaySound2D(GetWorld(), benelliSFX);
 
-					if (bReturnValue)
+					capacitySGAmount--;
+
+					// #### Bullet Spawn ####
+					//FTransform t = firePos->GetComponentTransform();
+					//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
+
+					//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
+
+
+					if (false == bOnWidget)
 					{
-						//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+						FHitResult outHit;
+						FVector start = cameraComp->GetComponentLocation();
+						FVector end = start + cameraComp->GetForwardVector() * 100000;
+						FCollisionQueryParams params;
+						params.AddIgnoredActor(this);
 
-						//UPrimitiveComponent* hitComp = outHit.GetComponent();
+						bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
 
-						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
-
-						AActor* HitActor = outHit.GetActor();
-
-						AEnemy* enemyActor = Cast<AEnemy>(HitActor);
-						if (enemyActor)
+						if (bReturnValue)
 						{
-							auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
+							//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
 
-							if (enemy)
+							//UPrimitiveComponent* hitComp = outHit.GetComponent();
+
+							//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
+
+							AActor* HitActor = outHit.GetActor();
+
+							AEnemy* enemyActor = Cast<AEnemy>(HitActor);
+							if (enemyActor)
 							{
-								auto enemyFSM = Cast<UEnemyFSM>(enemy);
+								auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
 
-								
+								if (enemy)
+								{
+									auto enemyFSM = Cast<UEnemyFSM>(enemy);
 
-								// #### Enemy 单固瘤 贸府 ####
-								enemyFSM->DamageState();
+									UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), bloodFX, outHit.ImpactPoint);
+
+									// #### Enemy 单固瘤 贸府 ####
+									enemyFSM->DamageState();
+								}
+							}
+							else
+							{
+								UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
 							}
 						}
 					}
+					if (currentSGAmmoAmount <= 0 && capacitySGAmount <= 0)
+					{
+						bHasSGAmmo = false;
+					}
 				}
-				if (currentSRAmmoAmount <= 0)
+			}
+			else if (checkCurrentWeaponIndex == 2)
+			{
+				if (bHasSRAmmo && capacitySRAmount > 0)
 				{
-					bHasSRAmmo = false;
+					bIsFire = true;
+
+					UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
+
+					capacitySRAmount--;
+
+					// #### Bullet Spawn ####
+					//FTransform t = firePos->GetComponentTransform();
+					//FTransform t1 = ak47AttachPos->GetSocketTransform(FName("AKMuzzle"));
+
+					//GetWorld()->SpawnActor<AARBulletActor>(bulletFactory, t1);
+
+
+					if (false == bOnWidget)
+					{
+						FHitResult outHit;
+						FVector start = cameraComp->GetComponentLocation();
+						FVector end = start + cameraComp->GetForwardVector() * 100000;
+						FCollisionQueryParams params;
+						params.AddIgnoredActor(this);
+
+						bool bReturnValue = GetWorld()->LineTraceSingleByChannel(outHit, start, end, ECollisionChannel::ECC_Visibility, params);
+
+						if (bReturnValue)
+						{
+							//DrawDebugLine(GetWorld(), outHit.TraceStart, outHit.ImpactPoint, FColor::Red, false, 10);
+
+							//UPrimitiveComponent* hitComp = outHit.GetComponent();
+
+							//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
+
+							AActor* HitActor = outHit.GetActor();
+
+							AEnemy* enemyActor = Cast<AEnemy>(HitActor);
+							if (enemyActor)
+							{
+								auto enemy = outHit.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
+
+								if (enemy)
+								{
+									auto enemyFSM = Cast<UEnemyFSM>(enemy);
+
+									UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), bloodFX, outHit.ImpactPoint);
+
+									// #### Enemy 单固瘤 贸府 ####
+									enemyFSM->DamageState();
+								}
+							}
+							else
+							{
+								UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), expVFX, outHit.ImpactPoint);
+							}
+						}
+					}
+					if (currentSRAmmoAmount <= 0 && capacitySRAmount <= 0)
+					{
+						bHasSRAmmo = false;
+					}
 				}
 			}
 		}
@@ -474,6 +522,7 @@ void ABSPlayer::PlayerisDead()
 {
 	if (playerCurrentHP <= 0)
 	{
+		//UGameplayStatics::PlaySound2D(GetWorld(), hurtVoice);
 		isPlayerDead = true;
 		this->PlayAnimMontage(playerDeadMontage);
 	}
@@ -518,41 +567,85 @@ void ABSPlayer::OnActionAiming()
 
 void ABSPlayer::OnActionZoomIn()
 {
-	if (bIsAiming && checkCurrentWeaponIndex == 0)
+	if (false == bOnWidget)
 	{
-		targetFOV = 50;
-	}
-	else if (bIsAiming && checkCurrentWeaponIndex == 1)
-	{
-		targetFOV = 50;
-	}
-	else if (bIsAiming && checkCurrentWeaponIndex == 2)
-	{
-		targetFOV = 20;
-	}
-	else
-	{
-		return;
+		if (bIsAiming && checkCurrentWeaponIndex == 0)
+		{
+			targetFOV = 50;
+		}
+		else if (bIsAiming && checkCurrentWeaponIndex == 1)
+		{
+			targetFOV = 50;
+		}
+		else if (bIsAiming && checkCurrentWeaponIndex == 2)
+		{
+			sniperUI->SetVisibility(ESlateVisibility::Visible);
+			targetFOV = 20;
+		}
+		else
+		{
+			return;
+		}
 	}
 }
 
 void ABSPlayer::OnActionZoomOut()
 {
+	sniperUI->SetVisibility(ESlateVisibility::Hidden);
 	targetFOV = 90;
 }
 
 void ABSPlayer::Zoom()
 {
-	cameraComp->FieldOfView = FMath::Lerp<float>(cameraComp->FieldOfView, targetFOV, GetWorld()->GetDeltaSeconds() * 6);
+	if (false == bOnWidget)
+	{
+		cameraComp->FieldOfView = FMath::Lerp<float>(cameraComp->FieldOfView, targetFOV, GetWorld()->GetDeltaSeconds() * 6);
+	}
 }
 
 void ABSPlayer::onDamage()
 {
+	UGameplayStatics::PlaySound2D(GetWorld(), hurtVoice);
 	playerCurrentHP -= 10;
 
 	if (playerCurrentHP <= 0)
 	{
 		PlayerisDead();
 	}
+}
+
+void ABSPlayer::OnActionCrouch()
+{
+	if (false == bIsEquipRifleOnHand)
+	{
+		if (false == bIsCrouch)
+		{
+			bIsCrouch = true;
+			GetCharacterMovement()->Crouch();
+		}
+		else
+		{
+			bIsCrouch = false;
+			GetCharacterMovement()->UnCrouch();
+		}
+	}
+	else
+	{
+		if (false == bIsEquipCrouch)
+		{
+			bIsEquipCrouch = true;
+			GetCharacterMovement()->Crouch();
+		}
+		else
+		{
+			bIsEquipCrouch = false;
+			GetCharacterMovement()->UnCrouch();
+		}
+	}
+}
+
+void ABSPlayer::OnEquipCrouch()
+{
+
 }
 
