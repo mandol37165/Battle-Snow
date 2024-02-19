@@ -133,6 +133,7 @@ void UEnemyFSM::PatrolState(FVector targetDir)
 
     else if (enemyCurrentHP == 0) {
         Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+        Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->killCount += 1;
         state = EEnemyState::Die;
     }
 
@@ -165,6 +166,7 @@ void UEnemyFSM::AttackReadyState()
 
     else if (enemyCurrentHP == 0) {
         Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+        Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->killCount += 1;
         state = EEnemyState::Die;
     }
 
@@ -208,6 +210,7 @@ void UEnemyFSM::ShootState()
 
     else if (enemyCurrentHP == 0) {
         Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+        Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->killCount += 1;
         state = EEnemyState::Die;
     }
 }
@@ -219,6 +222,7 @@ void UEnemyFSM::DamageState()
 
     if (enemyCurrentHP == 0) {
         Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+        Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->killCount += 1;
         state = EEnemyState::Die;
     }
 }
@@ -240,6 +244,7 @@ void UEnemyFSM::EscapeState()
 
     else if (enemyCurrentHP == 0) {
         Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+        Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->killCount += 1;
         state = EEnemyState::Die;
     }
 }
