@@ -76,6 +76,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* barretLSPos;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* parachutePos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* rChickenPos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* lChickenPos;
+
 	FVector direction;
 
 	void Move();
@@ -121,6 +130,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsEquipCrouch;
+
+	void OnActionCrouch();
+
+	void OnEquipCrouch();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsSprint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsEquipSprint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsProne = false;
@@ -213,6 +232,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* expVFX;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UParticleSystem* bloodFX;
+
 	void CheckMFIn();
 
 	void TakeDamageOutMF();
@@ -221,5 +243,41 @@ public:
 	class USoundBase* fireSFX;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* ak47SFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* benelliSFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* hurtVoice;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool hasDrug;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool inJumpPos = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isJumpOnAricraft = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool openParachute = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float killCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float aliveCount = 5;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 firstSlotIndex = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 secondSlotIndex = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UUserWidget> sniperFactory;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UUserWidget* sniperUI;
 };

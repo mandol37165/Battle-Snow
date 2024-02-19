@@ -33,14 +33,23 @@ public:
 	class UStaticMeshComponent* ak47LSPos;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* ak47HandPos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* benelliM4RSPos;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* benelliM4LSPos;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* benelliM4HandPos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* barretRSPos;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* barretLSPos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* barretHandPos;
 };

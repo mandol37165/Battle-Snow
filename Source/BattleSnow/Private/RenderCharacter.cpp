@@ -49,6 +49,19 @@ ARenderCharacter::ARenderCharacter()
 		ak47LSPos->SetVisibility(false);
 	}
 
+	ak47HandPos = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ak47AttachPos"));
+	ak47HandPos->SetupAttachment(renderMesh);
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempAkMesh(TEXT("/Script/Engine.StaticMesh'/Game/Models/Weapon/AR/AK47/AK47.AK47'"));
+
+	if (tempAkMesh.Succeeded())
+	{
+		ak47HandPos->SetStaticMesh(tempAkMesh.Object);
+		ak47HandPos->AttachToComponent(renderMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("AK47Socket")));
+		ak47HandPos->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ak47HandPos->SetVisibility(false);
+	}
+
 	benelliM4RSPos = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BenelliM4RSPos"));
 	benelliM4RSPos->SetupAttachment(renderMesh);
 
@@ -73,6 +86,19 @@ ARenderCharacter::ARenderCharacter()
 		benelliM4LSPos->AttachToComponent(renderMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("BenelliM4LSSocket"));
 		benelliM4LSPos->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		benelliM4LSPos->SetVisibility(false);
+	}
+
+	benelliM4HandPos = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BenelliM4HandPos"));
+	benelliM4HandPos->SetupAttachment(renderMesh);
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempBenelliMesh(TEXT("/Script/Engine.StaticMesh'/Game/Models/Weapon/SG/Benelli_M4/Benelli_M4.Benelli_M4'"));
+
+	if (tempBenelliMesh.Succeeded())
+	{
+		benelliM4HandPos->SetStaticMesh(tempBenelliMesh.Object);
+		benelliM4HandPos->AttachToComponent(renderMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("BenelliHandSocket")));
+		benelliM4HandPos->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		benelliM4HandPos->SetVisibility(false);
 	}
 
 	barretRSPos = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BarretRSPos"));
@@ -101,6 +127,18 @@ ARenderCharacter::ARenderCharacter()
 		barretLSPos->SetVisibility(false);
 	}
 
+	barretHandPos = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("barretHandPos"));
+	barretHandPos->SetupAttachment(renderMesh);
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempBarretMesh(TEXT("/Script/Engine.StaticMesh'/Game/Models/Weapon/SR/Barret/Barret_Fix.Barret_Fix'"));
+
+	if (tempBarretMesh.Succeeded())
+	{
+		barretHandPos->SetStaticMesh(tempBarretMesh.Object);
+		barretHandPos->AttachToComponent(renderMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("BarretHandSocket")));
+		barretHandPos->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		barretHandPos->SetVisibility(false);
+	}
 }
 
 // Called when the game starts or when spawned
