@@ -43,10 +43,7 @@ void AMagneticField::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FTimerHandle TimerHandle;
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMagneticField::makeMFSmall, 5.0f, true);
-
+	state = EMFState::Ready;
 
 }
 
@@ -54,12 +51,39 @@ void AMagneticField::BeginPlay()
 void AMagneticField::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+	switch (state)
+	{
+	case EMFState::Ready:
+		readyState();
+		break;
+	case EMFState::activateMF:
+		currentTime += GetWorld()->GetDeltaSeconds();
+		if (currentTime >= 5) {
+			activateMFState();
+			currentTime = 0;
+		}
+		break;
+	}
+}
+
+void AMagneticField::readyState()
+{
+	currentTime += GetWorld()->GetDeltaSeconds();
+	//플레이 30초 뒤부터 자기장 줄어들도록
+	if (currentTime > 30) {
+		UE_LOG(LogTemp, Warning, TEXT("10 sec"));
+		state = EMFState::activateMF;
+	}
+}
+
+void AMagneticField::activateMFState()
+{
+	makeMFSmall();
 }
 
 void AMagneticField::makeMFSmall()
 {
-	
+	UE_LOG(LogTemp, Warning, TEXT("make it small"));
 		FVector targetScale;
 		FVector actorScale = this->GetActorScale3D();
 		//5초마다
@@ -68,7 +92,7 @@ void AMagneticField::makeMFSmall()
 		targetScale.Z = 1.0;
 
 		SetActorScale3D(FMath::Lerp<FVector>(actorScale, targetScale, 0.1));
-		UE_LOG(LogTemp, Warning, TEXT("Make it small"));
+		
 	
 }
 

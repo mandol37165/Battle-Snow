@@ -42,7 +42,7 @@ void AMFManager::BeginPlay()
                     // 자기장 생성
                    //World->SpawnActor<AMagneticField>(AMagneticField::StaticClass(), MFLocation, FRotator::ZeroRotator);
                    World->SpawnActor<AMagneticField>(magneticFieldFactory, MFLocation, FRotator::ZeroRotator);
-                    UE_LOG(LogTemp, Warning, TEXT("complete") );
+           
                 
             }
         }

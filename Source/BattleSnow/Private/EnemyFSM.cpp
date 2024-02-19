@@ -9,6 +9,11 @@
 #include "EngineUtils.h"
 #include "ARBulletActor.h"
 #include "TimerManager.h"
+#include "BSGameModeBase.h"
+#include "NavigationSystem.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "AIController.h"
 
 // Sets default values for this component's properties
 UEnemyFSM::UEnemyFSM()
@@ -35,8 +40,9 @@ void UEnemyFSM::BeginPlay()
 	}*/
 	
 	//초기 모드 getTarget
-	state = EEnemyState::GetTarget;
-
+	
+	state = EEnemyState::Ready;
+	
 	
 }
 
@@ -48,11 +54,17 @@ void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	
 	switch (state)
 	{
+	case EEnemyState::Ready:
+		ReadyState();
+		break;
 	case EEnemyState::GetTarget:
 		GetTargetState();
 		break;
 	case EEnemyState::Patrol:
 		PatrolState(dir);
+		break;
+	case EEnemyState::Hide:
+		HideState();
 		break;
 	case EEnemyState::AttackReady:
 		AttackReadyState();
@@ -70,12 +82,33 @@ void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		DieState();
 		break;
 	
+	
+	}
+}
+
+void UEnemyFSM::ReadyState()
+{
+	me->SetActorHiddenInGame(true);
+	currentTime += GetWorld()->GetDeltaSeconds();
+	if (currentTime > 30) {
+		me->SetActorHiddenInGame(false);
+		state = EEnemyState::GetTarget;
 	}
 }
 
 void UEnemyFSM::GetTargetState()
 {
-	int randValue;
+	/*UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+
+	if (NavSystem) {
+
+		FVector Origin = GetPawn()->GetActorLocation();
+		FVector RandomPoint = NavSystem->GetRandomReachablePointInRadius(Origin, SearchRadius);
+		MoveToLocation(RandomPoint);
+	}
+*/
+
+	int randValue; 
 	randValue = rand() % 2;
 	targetP = GetWorld()->GetFirstPlayerController()->GetPawn();
 
@@ -95,12 +128,17 @@ void UEnemyFSM::GetTargetState()
 	state = EEnemyState::Patrol;
 }
 
-void UEnemyFSM::PatrolState(FVector DIR)
+void UEnemyFSM::PatrolState(FVector targetDir)
 {	
+<<<<<<< HEAD
+	
+	me->AddMovementInput(targetDir.GetSafeNormal());
+	FRotator NewRotation = FRotationMatrix::MakeFromX(targetDir).Rotator();
+	me->SetActorRotation(NewRotation);
+=======
 	state = EEnemyState::Patrol;
 	me->AddMovementInput(DIR.GetSafeNormal());
-	FRotator NewRotation = FRotationMatrix::MakeFromX(DIR).Rotator();
-	me->SetActorRotation(NewRotation);
+>>>>>>> parent of e650459 (add)
 
 	//플레이어 공격범위 안에 들어오면 공격모드로 전이
 	FVector direction = targetP->GetActorLocation() - me->GetActorLocation();
@@ -108,29 +146,47 @@ void UEnemyFSM::PatrolState(FVector DIR)
 		state = EEnemyState::AttackReady;
 	}
 
+	else if (enemyCurrentHP == 0) {
+		Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+		state = EEnemyState::Die;
+	}
+	
 }
 
 
+void UEnemyFSM::HideState()
+{
+
+}
+
 void UEnemyFSM::AttackReadyState()
 {
-	
-	dir = targetP->GetActorLocation() - me->GetActorLocation();
-
 	//무기에 따른 슈팅 반경 설정
 	/*if (weaponInfo == 0) shootingRange = shootingRangeShort;
 	else if (weaponInfo == 1) shootingRange = shootingRangeMid;
 	else if (weaponInfo == 2) shootingRange = shootingRangeLong;*/
 
+<<<<<<< HEAD
+	dir = targetP->GetActorLocation() - me->GetActorLocation();
 	me->AddMovementInput(dir.GetSafeNormal());
+
 	FRotator NewRotation = FRotationMatrix::MakeFromX(dir).Rotator();
 	me->SetActorRotation(NewRotation);
+=======
 	float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
+	me->AddMovementInput(dir.GetSafeNormal());
+>>>>>>> parent of e650459 (add)
+	
 	//플레이어 반경에 들면 멈추고 Shoot모드로 전이
+	float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
 	if (distance <= shootingRange) {
 		state = EEnemyState::ShootReady;
 	}
-	
 
+	else if (enemyCurrentHP == 0) {
+		Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+		state = EEnemyState::Die;
+	}
 	
 }
 
@@ -142,6 +198,7 @@ void UEnemyFSM::ShootState()
 	FRotator NewRotation= FRotationMatrix::MakeFromX(directionToPlayer).Rotator();
 	me->SetActorRotation(NewRotation);
 
+
 	//0.7초마다 발사
 	currentTime += GetWorld()->GetDeltaSeconds();
 	if (currentTime > 0.7) {
@@ -149,7 +206,11 @@ void UEnemyFSM::ShootState()
 		UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
 		currentTime = 0;
 	}
-
+	shootingTime += GetWorld()->GetDeltaSeconds();
+	if (shootingTime > 2) {
+		moveToLR();
+		shootingTime = 0;
+	}
 	float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
 
 	//공격 범위 벗어나면 patrol모드로 전이
@@ -164,6 +225,11 @@ void UEnemyFSM::ShootState()
 		//GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 		state = EEnemyState::Escape;
 	}
+
+	else if (enemyCurrentHP == 0) {
+		Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+		state = EEnemyState::Die;
+	}
 }
 
 void UEnemyFSM::DamageState()
@@ -171,7 +237,8 @@ void UEnemyFSM::DamageState()
 	
 	enemyCurrentHP -= 10;
 
-	if (enemyCurrentHP <= 0) {
+	if (enemyCurrentHP == 0) {
+		Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
 		state = EEnemyState::Die;
 	}
 }
@@ -190,12 +257,20 @@ void UEnemyFSM::EscapeState()
 	if (distance > escapeRange) {
 		state = EEnemyState::GetTarget;
 	}
+
+	else if (enemyCurrentHP == 0) {
+		Cast<ABSGameModeBase>(GetWorld()->GetAuthGameMode())->countOfSurvivors -= 1;
+		state = EEnemyState::Die;
+	}
 }
 
 void UEnemyFSM::DieState()
 {
 	
+	me->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
+
+
 
 void UEnemyFSM::startShooting()
 {
@@ -221,11 +296,41 @@ void UEnemyFSM::startShooting()
 			ABSPlayer* playerActor = Cast<ABSPlayer>(HitActor);
 			if (playerActor)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("hit actor is player"));
-				//플레이어 damage 처리
-				playerActor->onDamage();
+				int hitRate = rand() % 10;
+				if (hitRate < 4) {
+					//플레이어 damage 처리
+					playerActor->onDamage();
+				}
+				
 			}
 		}
 	}
+}
+
+void UEnemyFSM::moveToLR()
+{
+	// 왼쪽으로 이동할 양을 결정하는 벡터입니다.
+	FVector Movement = FVector(-1.0f, 0.0f, 0.0f); // X 축 방향으로 -1만큼 이동합니다.
+	//me->AddMovementInput(Movement.GetSafeNormal());
+	// 이동에 필요한 속도를 계산합니다.
+	FVector DeltaLocation = Movement * 5 * GetWorld()->GetDeltaSeconds();
+
+	// 현재 액터의 위치를 가져옵니다.
+	FVector NewLocation = me->GetActorLocation();
+
+	// 새로운 위치를 계산합니다.
+	NewLocation += DeltaLocation;
+
+	// 액터의 위치를 변경합니다.
+	me->SetActorLocation(NewLocation);
+}
+
+void UEnemyFSM::MoveToRandomLocation()
+{
+}
+
+void UEnemyFSM::SetTargetAndAttack(ACharacter* TargetCharacter)
+{
+
 }
 

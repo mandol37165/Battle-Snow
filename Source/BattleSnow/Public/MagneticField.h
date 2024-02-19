@@ -6,6 +6,13 @@
 #include "GameFramework/Actor.h"
 #include "MagneticField.generated.h"
 
+UENUM()
+enum class EMFState : uint8
+{
+	Ready,
+	activateMF,
+};
+
 UCLASS()
 class BATTLESNOW_API AMagneticField : public AActor
 {
@@ -23,10 +30,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category=FSM)
+	EMFState state ;
+
+	void readyState();
+	void activateMFState();
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UStaticMeshComponent* magneticFieldComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USphereComponent* sphereComp;
+	
+	float currentTime = 0;
 
 	void makeMFSmall();
 };

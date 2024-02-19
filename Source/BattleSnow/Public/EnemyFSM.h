@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AIController.h"
 #include "Components/ActorComponent.h"
 #include "EnemyFSM.generated.h"
 //#include "Enemy.h"
@@ -10,8 +11,10 @@
 UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
+	Ready,
 	GetTarget,
 	Patrol,
+	Hide,
 	AttackReady,
 	ShootReady,
 	Damage,
@@ -39,20 +42,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category=FSM)
 	EEnemyState state ;
 
+	void ReadyState();
 	void GetTargetState();
-	void PatrolState(FVector DIR);
+	void PatrolState(FVector targetDir);
+	void HideState();
 	void AttackReadyState();
 	void ShootState();
 	void DamageState();
 	void EscapeState();
 	void DieState();
 
+
 	void startShooting();
-		
+	void moveToLR();
 	UPROPERTY(EditAnywhere,Category=FSM)
 	float idleDelayTime =2;
 	float currentTime = 0;
-
+	float shootingTime = 0;
 	//플레이어 타겟
 	UPROPERTY(EditAnywhere,Category=FSM)
 	AActor* targetP;
@@ -62,7 +68,7 @@ public:
 
 	//슈팅 반경 안에 들어오면 슈팅모드로 전환
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float shootingRange=7000;
+	float shootingRange=2000;
 	UPROPERTY(EditAnywhere,Category=FSM)
 	float shootingRangeShort=500.0f;
 	UPROPERTY(EditAnywhere,Category=FSM)
@@ -72,10 +78,10 @@ public:
 
 	//attackRange 범위 안에 들어오면 공격준비모드로 전환
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float attackReadyRange=12000.0f;
+	float attackReadyRange=3000.0f;
 
 	UPROPERTY(EditAnywhere,Category=FSM)
-	float escapeRange=8000.0f;
+	float escapeRange=6000.0f;
 
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere,Category=FSM)
@@ -91,12 +97,20 @@ public:
 	UPROPERTY(EditAnywhere)
 	class AEnemy* enemy;
 
-public:
 	int32 weaponInfo;
-
-
 
 	UPROPERTY(EditAnywhere)
 	class USoundBase* fireSFX;
 
+	 UPROPERTY(EditAnywhere)
+    float SearchRadius = 1000.0f;
+
+	 UPROPERTY(EditAnywhere)
+    float MoveInterval = 5.0f;
+
+    FTimerHandle MoveTimerHandle;
+
+    void MoveToRandomLocation();
+
+    void SetTargetAndAttack(ACharacter* TargetCharacter);
 };
