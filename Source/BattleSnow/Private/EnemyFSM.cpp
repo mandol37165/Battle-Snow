@@ -38,7 +38,7 @@ void UEnemyFSM::BeginPlay()
        weaponInfo = me->weaponNum;
        UE_LOG(LogTemp, Warning, TEXT("%s"),weaponInfo );
     }*/
-
+    GetRandomChasePoint(SearchRadius, chasePoint);
     //초기 모드 getTarget
 
     state = EEnemyState::Ready;
@@ -90,7 +90,7 @@ void UEnemyFSM::ReadyState()
 {
     me->SetActorHiddenInGame(true);
     currentTime += GetWorld()->GetDeltaSeconds();
-    if (currentTime > 30) {
+    if (currentTime > 10) {
         me->SetActorHiddenInGame(false);
         state = EEnemyState::GetTarget;
     }
@@ -98,16 +98,6 @@ void UEnemyFSM::ReadyState()
 
 void UEnemyFSM::GetTargetState()
 {
-    /*UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
-
-    if (NavSystem) {
-
-       FVector Origin = GetPawn()->GetActorLocation();
-       FVector RandomPoint = NavSystem->GetRandomReachablePointInRadius(Origin, SearchRadius);
-       MoveToLocation(RandomPoint);
-    }
- */
-
     int randValue;
     randValue = rand() % 2;
     targetP = GetWorld()->GetFirstPlayerController()->GetPawn();
@@ -196,11 +186,11 @@ void UEnemyFSM::ShootState()
         UGameplayStatics::PlaySound2D(GetWorld(), fireSFX);
         currentTime = 0;
     }
-    shootingTime += GetWorld()->GetDeltaSeconds();
+   /* shootingTime += GetWorld()->GetDeltaSeconds();
     if (shootingTime > 2) {
         moveToLR();
         shootingTime = 0;
-    }
+    }*/
     float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
 
     //공격 범위 벗어나면 patrol모드로 전이
@@ -308,18 +298,18 @@ void UEnemyFSM::moveToLR()
 {
     // 왼쪽으로 이동할 양을 결정하는 벡터입니다.
     FVector Movement = FVector(-1.0f, 0.0f, 0.0f); // X 축 방향으로 -1만큼 이동합니다.
-    //me->AddMovementInput(Movement.GetSafeNormal());
+    me->AddMovementInput(Movement.GetSafeNormal());
     // 이동에 필요한 속도를 계산합니다.
-    FVector DeltaLocation = Movement * 5 * GetWorld()->GetDeltaSeconds();
+    //FVector DeltaLocation = Movement * 10000 * GetWorld()->GetDeltaSeconds();
 
-    // 현재 액터의 위치를 가져옵니다.
-    FVector NewLocation = me->GetActorLocation();
+    //// 현재 액터의 위치를 가져옵니다.
+    //FVector NewLocation = me->GetActorLocation();
 
-    // 새로운 위치를 계산합니다.
-    NewLocation += DeltaLocation;
+    //// 새로운 위치를 계산합니다.
+    //NewLocation += DeltaLocation;
 
-    // 액터의 위치를 변경합니다.
-    me->SetActorLocation(NewLocation);
+    //// 액터의 위치를 변경합니다.
+    //me->SetActorLocation(NewLocation);
 }
 
 void UEnemyFSM::MoveToRandomLocation()
@@ -329,4 +319,15 @@ void UEnemyFSM::MoveToRandomLocation()
 void UEnemyFSM::SetTargetAndAttack(ACharacter* TargetCharacter)
 {
 
+}
+
+bool UEnemyFSM::GetRandomChasePoint(float radius, FVector& outLoc)
+{
+    auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+    FNavLocation loc;
+    bool result = ns->GetRandomReachablePointInRadius(me->GetActorLocation(), radius, loc);
+    if (result) {
+        outLoc = loc.Location;
+    }
+    return result;
 }

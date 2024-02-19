@@ -91,7 +91,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemy)
     int32 enemyMaxHP = 100;
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemy)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Enemy)
     int32 enemyCurrentHP = 0;
 
     UPROPERTY(EditAnywhere)
@@ -103,7 +103,7 @@ public:
     class USoundBase* fireSFX;
 
     UPROPERTY(EditAnywhere)
-    float SearchRadius = 1000.0f;
+    float SearchRadius = 15000.0f;
 
     UPROPERTY(EditAnywhere)
     float MoveInterval = 5.0f;
@@ -113,4 +113,8 @@ public:
     void MoveToRandomLocation();
 
     void SetTargetAndAttack(ACharacter* TargetCharacter);
+    FVector chasePoint;
+    bool GetRandomChasePoint(float radius, FVector& outLoc);
+
+    TArray<AActor*> FoundActors;
 };
