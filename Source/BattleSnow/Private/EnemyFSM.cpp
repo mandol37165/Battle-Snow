@@ -31,7 +31,7 @@ void UEnemyFSM::BeginPlay()
     Super::BeginPlay();
 
     enemyCurrentHP = enemyMaxHP;
-    // ¹«±â Á¤º¸ °¡Á®¿À±â
+    // ë¬´ê¸° ì •ë³´ ê°€ì ¸ì˜¤ê¸°
     me = Cast<AEnemy>(GetOwner());
 
     /*if (me) {
@@ -39,7 +39,7 @@ void UEnemyFSM::BeginPlay()
        UE_LOG(LogTemp, Warning, TEXT("%s"),weaponInfo );
     }*/
     //GetRandomChasePoint(SearchRadius, chasePoint);
-    //ÃÊ±â ¸ğµå getTarget
+    //ì´ˆê¸° ëª¨ë“œ getTarget
 
     state = EEnemyState::Ready;
 
@@ -103,7 +103,7 @@ void UEnemyFSM::GetTargetState()
     targetP = GetWorld()->GetFirstPlayerController()->GetPawn();
 
     if (randValue == 0) {
-        //ÇÃ·¹ÀÌ¾î·Î Å¸°Ù ¼³Á¤
+        //í”Œë ˆì´ì–´ë¡œ íƒ€ê²Ÿ ì„¤ì •
         dir = targetP->GetActorLocation() - me->GetActorLocation();
     }
 
@@ -111,7 +111,7 @@ void UEnemyFSM::GetTargetState()
 
         AMFManager* MFManager = Cast<AMFManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AMFManager::StaticClass()));
         //for (TActorIterator<AMFManager> it(GetWorld()); it; ++it){MFManager = *it;
-        //ÀÚ±âÀå Áß½ÉÀ» ¸ñÇ¥Á¡À¸·Î ¼³Á¤
+        //ìê¸°ì¥ ì¤‘ì‹¬ì„ ëª©í‘œì ìœ¼ë¡œ ì„¤ì •
         dir = MFManager->MFLocation - me->GetActorLocation();
     }
 
@@ -125,7 +125,7 @@ void UEnemyFSM::PatrolState(FVector targetDir)
     FRotator NewRotation = FRotationMatrix::MakeFromX(targetDir).Rotator();
     me->SetActorRotation(NewRotation);
 
-    //ÇÃ·¹ÀÌ¾î °ø°İ¹üÀ§ ¾È¿¡ µé¾î¿À¸é °ø°İ¸ğµå·Î ÀüÀÌ
+    //í”Œë ˆì´ì–´ ê³µê²©ë²”ìœ„ ì•ˆì— ë“¤ì–´ì˜¤ë©´ ê³µê²©ëª¨ë“œë¡œ ì „ì´
     FVector direction = targetP->GetActorLocation() - me->GetActorLocation();
     if (direction.Size() < attackReadyRange) {
         state = EEnemyState::AttackReady;
@@ -147,7 +147,7 @@ void UEnemyFSM::HideState()
 
 void UEnemyFSM::AttackReadyState()
 {
-    //¹«±â¿¡ µû¸¥ ½´ÆÃ ¹İ°æ ¼³Á¤
+    //ë¬´ê¸°ì— ë”°ë¥¸ ìŠˆíŒ… ë°˜ê²½ ì„¤ì •
     /*if (weaponInfo == 0) shootingRange = shootingRangeShort;
     else if (weaponInfo == 1) shootingRange = shootingRangeMid;
     else if (weaponInfo == 2) shootingRange = shootingRangeLong;*/
@@ -158,7 +158,7 @@ void UEnemyFSM::AttackReadyState()
     FRotator NewRotation = FRotationMatrix::MakeFromX(dir).Rotator();
     me->SetActorRotation(NewRotation);
 
-    //ÇÃ·¹ÀÌ¾î ¹İ°æ¿¡ µé¸é ¸ØÃß°í Shoot¸ğµå·Î ÀüÀÌ
+    //í”Œë ˆì´ì–´ ë°˜ê²½ì— ë“¤ë©´ ë©ˆì¶”ê³  Shootëª¨ë“œë¡œ ì „ì´
     float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
     if (distance <= shootingRange) {
         state = EEnemyState::ShootReady;
@@ -181,7 +181,7 @@ void UEnemyFSM::ShootState()
     me->SetActorRotation(NewRotation);
 
 
-    //0.7ÃÊ¸¶´Ù ¹ß»ç
+    //0.7ì´ˆë§ˆë‹¤ ë°œì‚¬
     currentTime += GetWorld()->GetDeltaSeconds();
     if (currentTime > 0.7) {
         startShooting();
@@ -195,14 +195,14 @@ void UEnemyFSM::ShootState()
     }*/
     float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
 
-    //°ø°İ ¹üÀ§ ¹ş¾î³ª¸é patrol¸ğµå·Î ÀüÀÌ
+    //ê³µê²© ë²”ìœ„ ë²—ì–´ë‚˜ë©´ patrolëª¨ë“œë¡œ ì „ì´
     if (distance > attackReadyRange) {
         //GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
         state = EEnemyState::GetTarget;
 
     }
 
-    //Ã¼·ÂÀÌ 30ÀÌÇÏ¸é escape ¸ğµå·Î ÀüÀÌ
+    //ì²´ë ¥ì´ 30ì´í•˜ë©´ escape ëª¨ë“œë¡œ ì „ì´
     else if (enemyCurrentHP <= 30) {
         //GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
         state = EEnemyState::Escape;
@@ -230,13 +230,13 @@ void UEnemyFSM::DamageState()
 
 void UEnemyFSM::EscapeState()
 {
-    //ÇÃ·¹ÀÌ¾î¿Í ¹İ´ë ¹æÇâÀ¸·Î ÀÌµ¿
+    //í”Œë ˆì´ì–´ì™€ ë°˜ëŒ€ ë°©í–¥ìœ¼ë¡œ ì´ë™
     dir = me->GetActorLocation() - targetP->GetActorLocation();
     me->AddMovementInput(dir.GetSafeNormal());
     FRotator NewRotation = FRotationMatrix::MakeFromX(dir).Rotator();
     me->SetActorRotation(NewRotation);
 
-    // ÀÏÁ¤ °Å¸® ÀÌ»ó ¸Ö¾îÁ³À» ½Ã patrol ¸ğµå·Î ÀüÀÌ
+    // ì¼ì • ê±°ë¦¬ ì´ìƒ ë©€ì–´ì¡Œì„ ì‹œ patrol ëª¨ë“œë¡œ ì „ì´
     float distance = FVector::Distance(targetP->GetActorLocation(), me->GetActorLocation());
     if (distance > escapeRange) {
         state = EEnemyState::GetTarget;
@@ -253,7 +253,7 @@ void UEnemyFSM::DieState()
 {
 
     me->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    // Mandol Ãß°¡
+    // Mandol ì¶”ê°€
     auto playerController = GetWorld()->GetFirstPlayerController();
     auto player = Cast<ABSPlayer>(playerController->GetCharacter());
     player->killCount += 1;
@@ -268,29 +268,29 @@ void UEnemyFSM::startShooting()
 {
     FHitResult outHit;
 
-    FVector Start = me->GetActorLocation(); // ·¹ÀÌÄ³½ºÆ®ÀÇ ½ÃÀÛÁ¡
-    FVector End = Start + me->GetActorForwardVector() * 100000; // ·¹ÀÌÄ³½ºÆ®ÀÇ Á¾·áÁ¡
+    FVector Start = me->GetActorLocation(); // ë ˆì´ìºìŠ¤íŠ¸ì˜ ì‹œì‘ì 
+    FVector End = Start + me->GetActorForwardVector() * 100000; // ë ˆì´ìºìŠ¤íŠ¸ì˜ ì¢…ë£Œì 
 
     FCollisionQueryParams CollisionParams;
-    CollisionParams.AddIgnoredActor(me); // ÇöÀç ¾×ÅÍ´Â Ãæµ¹ °Ë»ç¿¡¼­ ¹«½Ã
+    CollisionParams.AddIgnoredActor(me); // í˜„ì¬ ì•¡í„°ëŠ” ì¶©ëŒ ê²€ì‚¬ì—ì„œ ë¬´ì‹œ
 
-    // ·¹ÀÌÄ³½ºÆ®¸¦ ¼öÇàÇÏ°í Ãæµ¹ Á¤º¸¸¦ outHit¿¡ ÀúÀå.
+    // ë ˆì´ìºìŠ¤íŠ¸ë¥¼ ìˆ˜í–‰í•˜ê³  ì¶©ëŒ ì •ë³´ë¥¼ outHitì— ì €ì¥.
     bool bIsHit = GetWorld()->LineTraceSingleByChannel(outHit, Start, End, ECC_Visibility, CollisionParams);
 
     if (bIsHit)
     {
         UE_LOG(LogTemp, Warning, TEXT("bls Hit True"));
-        // Ãæµ¹ÇÑ ¾×ÅÍ¸¦ Ã³¸®
+        // ì¶©ëŒí•œ ì•¡í„°ë¥¼ ì²˜ë¦¬
         AActor* HitActor = outHit.GetActor();
         if (HitActor)
         {
-            // Ãæµ¹ÇÑ ¾×ÅÍ°¡ ÀûÀÎÁö È®ÀÎ
+            // ì¶©ëŒí•œ ì•¡í„°ê°€ ì ì¸ì§€ í™•ì¸
             ABSPlayer* playerActor = Cast<ABSPlayer>(HitActor);
             if (playerActor)
             {
                 int hitRate = rand() % 10;
                 if (hitRate < 4) {
-                    //ÇÃ·¹ÀÌ¾î damage Ã³¸®
+                    //í”Œë ˆì´ì–´ damage ì²˜ë¦¬
                     playerActor->onDamage();
                 }
 
@@ -301,20 +301,7 @@ void UEnemyFSM::startShooting()
 
 void UEnemyFSM::moveToLR()
 {
-    // ¿ŞÂÊÀ¸·Î ÀÌµ¿ÇÒ ¾çÀ» °áÁ¤ÇÏ´Â º¤ÅÍÀÔ´Ï´Ù.
-    FVector Movement = FVector(-1.0f, 0.0f, 0.0f); // X Ãà ¹æÇâÀ¸·Î -1¸¸Å­ ÀÌµ¿ÇÕ´Ï´Ù.
-    me->AddMovementInput(Movement.GetSafeNormal());
-    // ÀÌµ¿¿¡ ÇÊ¿äÇÑ ¼Óµµ¸¦ °è»êÇÕ´Ï´Ù.
-    //FVector DeltaLocation = Movement * 10000 * GetWorld()->GetDeltaSeconds();
-
-    //// ÇöÀç ¾×ÅÍÀÇ À§Ä¡¸¦ °¡Á®¿É´Ï´Ù.
-    //FVector NewLocation = me->GetActorLocation();
-
-    //// »õ·Î¿î À§Ä¡¸¦ °è»êÇÕ´Ï´Ù.
-    //NewLocation += DeltaLocation;
-
-    //// ¾×ÅÍÀÇ À§Ä¡¸¦ º¯°æÇÕ´Ï´Ù.
-    //me->SetActorLocation(NewLocation);
+   
 }
 
 void UEnemyFSM::MoveToRandomLocation()
